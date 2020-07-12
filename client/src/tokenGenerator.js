@@ -1,4 +1,3 @@
-require('dotenv').config();
 const AccessToken = require('twilio').jwt.AccessToken;
 const VideoGrant = AccessToken.VideoGrant;
 const twilioAccountSid = process.env.REACT_APP_TWILIO_ACCOUNT_SID;

@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect, createLocalVideoTrack } from 'twilio-video';
 import './App.css';
+const tokenGenerator = require('./tokenGenerator');
 
 const usernameInput = document.getElementById('username');
 const button = document.getElementById('join_leave');
@@ -46,25 +47,32 @@ function connectButtonHandler(e) {
 
 function handleConnection(username) {
   var promise = new Promise((resolve, reject) => {
-    fetch('/login', {
-      method: 'POST',
-      body: JSON.stringify({'username': username})
-    }).then(res => res.json()).then(data => {
-      return connect(data)
+    // fetch('/login', {
+    //   method: 'POST',
+    //   body: JSON.stringify({'username': username})
+    // }).then(res => res.json()).then(data => {
+    //   return connect(data)
+    // })
+    new Promise((resolve, reject) => {
+      var token = tokenGenerator(username, 'ROOM')
+      resolve(token);
     })
-    .then(_room => {
-      room = _room
-      console.log(`Successfully joined a Room: ${room}`);
-      room.participants.forEach(participantConnected);
-      room.on('participantConnected', participantConnected);
-      room.on('participantDisconnected', participantDisconnected);
-      connected = true;
-      updateParticipantCount();
-      resolve();
-    }, error => {
-      console.error(`Unable to connect to Room: ${error.message}`);
-      reject();
-    });
+    .then(data => {
+      connect(data)
+      .then(_room => {
+        room = _room
+        console.log(`Successfully joined a Room: ${room}`);
+        room.participants.forEach(participantConnected);
+        room.on('participantConnected', participantConnected);
+        room.on('participantDisconnected', participantDisconnected);
+        connected = true;
+        updateParticipantCount();
+        resolve();
+      }, error => {
+        console.error(`Unable to connect to Room: ${error.message}`);
+        reject();
+      });
+    })
   })
   return promise;  
 }
